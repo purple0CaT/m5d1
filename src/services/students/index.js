@@ -53,12 +53,30 @@ studentsRouter.get("/:studentID", (req, res) => {
   }
 });
 // UPDATE / PUT /:id
-studentsRouter.put("/:id", (req, res) => {
-  res.send("Heyyyy!");
+studentsRouter.put("/:studentID", (req, res) => {
+  // Get students
+  const students = JSON.parse(fs.readFileSync(studentJson));
+  //   modify student
+  const remainStud = students.filter((stud) => stud.id != req.params.studentID);
+
+  const updateStud = { ...req.body, id: req.params.studentID };
+
+  remainStud.push(updateStud);
+  // read students
+  res.status(204).send("Heyyyy!");
 });
 // DELETE / :id
-studentsRouter.delete("/:id", (req, res) => {
-  res.send("Heyyyy!");
+studentsRouter.delete("/:studentID", (req, res) => {
+  // Get students
+  const students = JSON.parse(fs.readFileSync(studentJson));
+  // FIlter student id
+  const remainStudent = students.filter(
+    (std) => std.id != req.params.studentID
+  );
+  //   write array back to the file
+  fs.writeFileSync(studentJson, JSON.stringify(remainStudent));
+  console.log(remainStudent);
+  res.status(204).send();
 });
 
 export default studentsRouter;
