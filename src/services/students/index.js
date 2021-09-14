@@ -14,7 +14,7 @@ console.log("Stud_dir -", currentDirP);
 // concatenate / Do not use +!!!
 const studentJson = join(currentDirP, "students.json");
 
-// CREATE / POST
+// READ / GET
 studentsRouter.get("/", (req, res) => {
   // read stud.json
   const studFile = fs.readFileSync(studentJson);
@@ -22,8 +22,12 @@ studentsRouter.get("/", (req, res) => {
   //   return file
   res.send(students);
 });
-// READ / GET
+// CREATE / POST
 studentsRouter.post("/", (req, res) => {
+  // read the request body and response
+    console.log(req.body)
+  //
+
   res.send("Heyyyy!");
 });
 // READ / GET /:id
