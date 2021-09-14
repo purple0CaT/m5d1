@@ -3,6 +3,7 @@ import express from "express";
 import fs from "fs";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
+import uniqid from "uniqid";
 // =
 const studentsRouter = express.Router();
 // PATH
@@ -24,11 +25,19 @@ studentsRouter.get("/", (req, res) => {
 });
 // CREATE / POST
 studentsRouter.post("/", (req, res) => {
+  console.log("Request", req.body);
   // read the request body and response
-    console.log(req.body)
-  //
-
-  res.send("Heyyyy!");
+  const newStud = { ...req.body, id: uniqid(), createdAt: new Date() };
+  console.log(newStud);
+  //   PATH
+  const students = JSON.parse(fs.readFileSync(studentJson));
+  // PUSH
+  students.push(newStud);
+  //   write array back to the file
+  fs.writeFileSync(studentJson, JSON.stringify(students));
+  //   RESPONSE
+  console.log(students);
+  res.status(201).send(newStud);
 });
 // READ / GET /:id
 studentsRouter.get("/:studentID", (req, res) => {
