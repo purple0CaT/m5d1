@@ -49,7 +49,7 @@ studentsRouter.get("/:studentID", (req, res) => {
   if (student) {
     res.send(student);
   } else {
-    res.send("403");
+    res.status(401);
   }
 });
 // UPDATE / PUT /:id
@@ -57,13 +57,19 @@ studentsRouter.put("/:studentID", (req, res) => {
   // Get students
   const students = JSON.parse(fs.readFileSync(studentJson));
   //   modify student
-  const remainStud = students.filter((stud) => stud.id != req.params.studentID);
-
-  const updateStud = { ...req.body, id: req.params.studentID };
-
-  remainStud.push(updateStud);
+  //   const remainStud = students.filter((stud) => stud.id != req.params.studentID);
+  //   const updateStud = { ...req.body, id: req.params.studentID };
+  //   remainStud.push(updateStud);
+  // Index
+  const index = students.findIndex(
+    (student) => student.id == req.params.studentID
+  );
+  const updatedStudent = { ...students[index], ...req.body };
+  students[index] = updatedStudent;
+  //   write array back to the file
+  fs.writeFileSync(studentJson, JSON.stringify(students));
   // read students
-  res.status(204).send("Heyyyy!");
+  res.status(203).send(students);
 });
 // DELETE / :id
 studentsRouter.delete("/:studentID", (req, res) => {
