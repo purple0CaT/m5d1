@@ -1,9 +1,11 @@
 import express from "express";
 import cors from "cors";
+import { join } from "path";
 
 // import booksRouter from "./services/books/index.js";
 import studentsRouter from "./services/students/index.js";
 import listEndpoints from "express-list-endpoints";
+import filesRouter from "./services/files/files.js";
 import {
   genericErrHandl,
   notFoundErrHandl,
@@ -19,12 +21,16 @@ const loggerMiddleware = (req, res, next) => {
   console.log(`Req ${req.method}, Url ${req.url} -- ${new Date()} ${req}`);
   next();
 };
+const publicFolderPath = join(process.cwd(), "/public");
+console.log(publicFolderPath);
 // body converter
+server.use(express.static(publicFolderPath));
 server.use(loggerMiddleware); // - Global
 server.use(cors());
 server.use(express.json());
 // ==== ROUTES / ENDPOINTS ====
 server.use("/students", studentsRouter);
+server.use("/files", filesRouter);
 // server.use("/books", booksRouter);
 // ERROR MIDDLEWARE
 server.use(badreqFoundErrHandl);

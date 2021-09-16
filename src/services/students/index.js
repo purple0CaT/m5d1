@@ -1,30 +1,17 @@
 // ======== STUDENTS CRUD =========
 import express from "express";
-import fs from "fs";
-import { fileURLToPath } from "url";
-import { dirname, join } from "path";
 import uniqid from "uniqid";
 import createHttpError from "http-errors";
 import { studentValidationMiddleware } from "./validation.js";
 import { validationResult } from "express-validator";
+import { getStudent, writeStudent } from "../fs-tools.js";
 // =
 const studentsRouter = express.Router();
-// PATH
-// get url of index.js
-const studentJson = join(
-  dirname(fileURLToPath(import.meta.url)),
-  "students.json"
-);
-console.log("Stud_dir -", studentJson);
-// pull and save
-const getStudent = () => JSON.parse(fs.readFileSync(studentJson));
-const writeStudent = (content) =>
-  fs.writeFileSync(studentJson, JSON.stringify(content));
 // == READ / GET
-studentsRouter.get("/", (req, res) => {
+studentsRouter.get("/", async (req, res) => {
   try {
     // read stud.json
-    const students = getStudent();
+    const students = await getStudent();
     //   return file
     res.send(students);
   } catch (error) {
@@ -33,34 +20,35 @@ studentsRouter.get("/", (req, res) => {
 });
 // =
 // == CREATE / POST
-studentsRouter.post("/", studentValidationMiddleware, (req, res, next) => {
-  const errList = validationResult(req);
-  if (!errList.isEmpty()) {
-    next(createHttpError(400, "Error body"));
-  } else {
-    try {
-      // read the request body and response
-      const newStud = { ...req.body, id: uniqid(), createdAt: new Date() };
-      console.log(newStud);
-      //   PATH
-      const students = getStudent();
-      // == PUSH
-      students.push(newStud);
-      //   write array back to the file
-      writeStudent(students);
-      //   RESPONSE
-      console.log(students);
-      res.status(201).send(newStud);
-    } catch (error) {
-      next(createHttpError(402));
+studentsRouter.post(
+  "/",
+  studentValidationMiddleware,
+  async (req, res, next) => {
+    const errList = validationResult(req);
+    if (!errList.isEmpty()) {
+      next(createHttpError(400, "Error body"));
+    } else {
+      try {
+        const newStud = { ...req.body, id: uniqid(), createdAt: new Date() };
+        console.log(newStud);
+        const students = await getStudent();
+        // == PUSH
+        students.push(newStud);
+        writeStudent(students);
+        //   RESPONSE
+        console.log(students);
+        res.status(201).send(newStud);
+      } catch (error) {
+        next(createHttpError(402));
+      }
     }
   }
-});
+);
 // == READ / GET /:id
-studentsRouter.get("/:studentID", (req, res, next) => {
+studentsRouter.get("/:studentID", async (req, res, next) => {
   try {
     console.log(req.params.studentID);
-    const students = getStudent();
+    const students = await getStudent();
     //  find by id
     const student = students.find((s) => s.id == req.params.studentID);
     // return
@@ -74,10 +62,10 @@ studentsRouter.get("/:studentID", (req, res, next) => {
   }
 });
 // == UPDATE / PUT /:id
-studentsRouter.put("/:studentID", (req, res, next) => {
+studentsRouter.put("/:studentID", async (req, res, next) => {
   try {
     // Get students
-    const students = getStudent();
+    const students = await getStudent();
     //   modify student
     //   const remainStud = students.filter((stud) => stud.id != req.params.studentID);
     //   const updateStud = { ...req.body, id: req.params.studentID };
@@ -97,10 +85,10 @@ studentsRouter.put("/:studentID", (req, res, next) => {
   }
 });
 // == DELETE / :id
-studentsRouter.delete("/:studentID", (req, res, next) => {
+studentsRouter.delete("/:studentID", async (req, res, next) => {
   try {
     // Get students
-    const students = getStudent();
+    const students = await getStudent();
     // FIlter student id
     const remainStudent = students.filter(
       (std) => std.id != req.params.studentID

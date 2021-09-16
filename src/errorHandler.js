@@ -1,6 +1,6 @@
 export const badreqFoundErrHandl = (err, req, res, next) => {
   if (err.status == 400) {
-    res.status(400).send("Bad request!");
+    res.status(400).send(err.message);
   } else {
     next(err);
   }
